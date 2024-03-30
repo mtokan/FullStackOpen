@@ -19,12 +19,8 @@ const PersonForm = ({persons, setPersons, setNotification}) => {
             alert('name or number cannot be empty');
             return;
         }
-        const isNameExist = persons.some(person =>
-            person.name === newName
-        );
-        const isNumberExist = persons.some(person =>
-            person.number === newNumber
-        );
+        const isNameExist = persons.some(person => person.name === newName);
+        const isNumberExist = persons.some(person => person.number === newNumber);
         if (isNameExist && isNumberExist) {
             alert(`${newName} ${newNumber} is already added to phonebook`)
         } else if (isNameExist) {
@@ -33,15 +29,17 @@ const PersonForm = ({persons, setPersons, setNotification}) => {
                 const updatedPerson = {...existingPerson, number: newNumber};
                 const newPersonList = persons.filter(person => person.id !== existingPerson.id).concat(updatedPerson)
                 personService
-                    .update(updatedPerson.id, updatedPerson);
+                    .update(updatedPerson.id, updatedPerson)
+                    .catch(error => {
+                        setNotification({message: `Added ${error.response.data.error}`, isError: true})
+                        setTimeout(() => setNotification(null), 5000)
+                    })
                 setNewName('');
                 setNewNumber('');
                 setPersons(newPersonList);
             }
         } else if (isNumberExist) {
-            const owner = persons.find(person =>
-                person.number === newNumber
-            )
+            const owner = persons.find(person => person.number === newNumber)
             alert(`Number ${newNumber} already saved under the name ${owner.name}`)
         } else {
             const newPerson = {name: newName, number: newNumber, id: persons.length + 1}
@@ -51,25 +49,27 @@ const PersonForm = ({persons, setPersons, setNotification}) => {
                     setNotification({message: `Added ${returnedPerson.name}`, isError: false})
                     setTimeout(() => setNotification(null), 5000)
                     setPersons(persons.concat(returnedPerson));
-                    setNewName('');
-                    setNewNumber('');
                 })
+                .catch(error => {
+                    setNotification({message: `Added ${error.response.data.error}`, isError: true})
+                    setTimeout(() => setNotification(null), 5000)
+                })
+            setNewName('');
+            setNewNumber('');
         }
     }
 
-    return (
-        <form onSubmit={addPerson}>
-            <div>
-                name: <input value={newName} onChange={handleNameChange}/>
-            </div>
-            <div>
-                number: <input value={newNumber} onChange={handleNumberChange}/>
-            </div>
-            <div>
-                <button type="submit">add</button>
-            </div>
-        </form>
-    )
+    return (<form onSubmit={addPerson}>
+        <div>
+            name: <input value={newName} onChange={handleNameChange}/>
+        </div>
+        <div>
+            number: <input value={newNumber} onChange={handleNumberChange}/>
+        </div>
+        <div>
+            <button type="submit">add</button>
+        </div>
+    </form>)
 }
 
 export default PersonForm;
