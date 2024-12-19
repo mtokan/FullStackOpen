@@ -1,9 +1,11 @@
-const { test, after, beforeEach } = require('node:test')
+const {test, after, beforeEach} = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const app = require('../app')
 const assert = require("node:assert");
+const bcrypt = require("bcrypt");
 
 const api = supertest(app)
 
@@ -39,50 +41,69 @@ const initialBlogs = [{
     likes: 2,
 }]
 
+const getToken = async () => {
+    const response = await api.post('/api/login').send({username: 'root', password: 'password'})
+    return response.body.token
+}
+
+const requestWithAuth = async (method, url, body = {}) => {
+    return api[method](url).send(body).set('Authorization', `Bearer ${await getToken()}`)
+}
+
 beforeEach(async () => {
     await Blog.deleteMany({})
-
-    const blogObjects = initialBlogs.map(blog => new Blog(blog))
-    const promiseArray = blogObjects.map(blog => blog.save())
-    await Promise.all(promiseArray)
+    await User.deleteMany({})
+    const passwordHash = await bcrypt.hash('password', 10);
+    const user = await User.create({username: 'root', name: 'root', passwordHash})
+    await Blog.create(initialBlogs.map(blog => ({...blog, user: user._id})))
 })
 
 test('there are 6 blogs', async () => {
-    const response = await api.get('/api/blogs')
+    const response = await requestWithAuth('get', '/api/blogs')
     assert.strictEqual(response.body.length, 6)
 })
 
+test('no token provided', async () => {
+    const response = await api.post('/api/login').send({
+        title: 'Test blog',
+        author: 'Test author',
+        url: 'https://test.com',
+        likes: 100
+    })
+    assert.strictEqual(response.status, 401)
+})
+
 test('has a property named id', async () => {
-    const response = await api.get('/api/blogs')
+    const response = await requestWithAuth('get', '/api/blogs')
     console.log(response.body[0])
     assert(response.body[0].hasOwnProperty('id'))
 })
 
-test('add a new blog', async () => {
-    const response = await api.post('/api/blogs').send({
+test.only('add a new blog', async () => {
+    const response = await requestWithAuth('post', '/api/blogs', {
         title: 'Test blog',
         author: 'Test author',
         url: 'https://test.com',
         likes: 100
     })
     console.log(response.body)
-    const response2 = await api.get('/api/blogs')
+    const response2 = await requestWithAuth('get', '/api/blogs')
     assert.strictEqual(response2.body.length, 7)
 })
 
 test('likes default to 0', async () => {
-    const response = await api.post('/api/blogs').send({
+    const response = await requestWithAuth('post', '/api/blogs', {
         title: 'Test blog',
         author: 'Test author',
         url: 'https://test.com',
     })
     console.log(response.body)
-    const response2 = await api.get('/api/blogs')
+    const response2 = await requestWithAuth('get', '/api/blogs')
     assert.strictEqual(response2.body[6].likes, 0)
 })
 
 test('title is missing', async () => {
-    const response = await api.post('/api/blogs').send({
+    const response = await requestWithAuth('post', '/api/blogs', {
         author: 'Test author',
         url: 'https://test.com',
         likes: 100
@@ -92,7 +113,7 @@ test('title is missing', async () => {
 })
 
 test('url is missing', async () => {
-    const response = await api.post('/api/blogs').send({
+    const response = await requestWithAuth('post', '/api/blogs', {
         title: 'Test blog',
         author: 'Test author',
         likes: 100
@@ -102,20 +123,18 @@ test('url is missing', async () => {
 })
 
 test('delete first blog', async () => {
-    const response = await api.get('/api/blogs')
+    const response = await requestWithAuth('get', '/api/blogs')
     console.log(response.body[0])
-    await api.delete(`/api/blogs/${response.body[0].id}`)
-    const response2 = await api.get('/api/blogs')
+    await requestWithAuth('delete', `/api/blogs/${response.body[0].id}`)
+    const response2 = await requestWithAuth('get', '/api/blogs')
     assert.strictEqual(response2.body.length, 5)
 })
 
 test('update first blog likes', async () => {
-    const response = await api.get('/api/blogs')
+    const response = await requestWithAuth('get', '/api/blogs')
     console.log(response.body[0])
-    await api.put(`/api/blogs/${response.body[0].id}`).send({
-        likes: 100
-    })
-    const response2 = await api.get('/api/blogs')
+    await requestWithAuth('put', `/api/blogs/${response.body[0].id}`, {likes: 100})
+    const response2 = await requestWithAuth('get', '/api/blogs')
     assert.strictEqual(response2.body[0].likes, 100)
 })
 

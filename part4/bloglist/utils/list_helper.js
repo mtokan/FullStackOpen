@@ -25,15 +25,15 @@ const mostBLogs = (blogs) => {
 const mostLikes = (blogs) => {
     if (!blogs.length) return {}
 
-    const likesCountsMap = blogs.reduce((counts, {author,likes}) => {
+    const likesCountsMap = blogs.reduce((counts, {author, likes}) => {
         counts.set(author, (counts.get(author) || 0) + likes)
         return counts
-    },new Map())
+    }, new Map())
 
     const [authorWithMostLikes, totalLikes] = Array
-        .from(likesCountsMap.entries()).reduce((max,current) => max[1] > current[1] ? max : current)
+        .from(likesCountsMap.entries()).reduce((max, current) => max[1] > current[1] ? max : current)
 
-    return {author: authorWithMostLikes, likes:totalLikes}
+    return {author: authorWithMostLikes, likes: totalLikes}
 }
 
 module.exports = {dummy, totalLikes, favoriteBlogs, mostBLogs, mostLikes}

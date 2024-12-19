@@ -57,27 +57,27 @@ describe('most likes', () => {
     }]
 
     const emptyList = [];
-
+    
     test('of a bigger list is calculated right', () => {
         const result = listHelper.mostLikes(blogs)
         const shouldBe = {
-            author:'Edsger W. Dijkstra',
-            likes:17
+            author: 'Edsger W. Dijkstra',
+            likes: 17
         }
-        assert.deepStrictEqual(result,shouldBe)
+        assert.deepStrictEqual(result, shouldBe)
     })
 
     test('when the list has one blog', () => {
         const result = listHelper.mostLikes(listWithOneBlog)
         const shouldBe = {
-            author:'Michael Chan',
-            likes:7
+            author: 'Michael Chan',
+            likes: 7
         }
-        assert.deepStrictEqual(result,shouldBe)
+        assert.deepStrictEqual(result, shouldBe)
     })
 
     test('of empty list', () => {
         const result = listHelper.mostLikes(emptyList)
-        assert.deepStrictEqual(result,{})
+        assert.deepStrictEqual(result, {})
     })
 })

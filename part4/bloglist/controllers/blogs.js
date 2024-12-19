@@ -1,23 +1,30 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
-const {request, response} = require("express");
+const User = require('../models/user')
 
 blogsRouter.get('/', async (request, response) => {
-    const blogs = await Blog.find({})
+    const blogs = await Blog.find({}).populate('user', {username: 1, name: 1})
     response.json(blogs)
 })
 
 blogsRouter.post('/', async (request, response) => {
-    if (!request.body.title || !request.body.url ) {
-        return response.status(400).json({ error: 'title and url are required'})
+    const user = request.user
+    const {title, url, ...rest} = request.body
+    if (!title || !url) {
+        return response.status(400).json({error: 'title and url are required'})
     }
-    const blog = new Blog(request.body)
-    const result = await blog.save()
-    response.status(201).json(result)
+    const blog = await Blog.create({title, url, ...rest, user: user._id})
+    await User.findByIdAndUpdate(user._id, {$push: {blogs: blog._id}})
+    response.status(201).json(blog)
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
-    await Blog.findByIdAndDelete(request.params.id)
+    const user = request.user
+    const blog = await Blog.findById(request.params.id)
+    if (!(user.id === blog.user.toString())) {
+        return response.status(401).json({error: 'user not authorized to delete this blog'})
+    }
+    await blog.deleteOne()
     response.status(204).end()
 })
 

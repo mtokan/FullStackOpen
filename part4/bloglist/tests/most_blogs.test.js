@@ -61,23 +61,23 @@ describe('most blogs', () => {
     test('of a bigger list is calculated right', () => {
         const result = listHelper.mostBLogs(blogs)
         const shouldBe = {
-            author:'Robert C. Martin',
-            count:3
+            author: 'Robert C. Martin',
+            count: 3
         }
-        assert.deepStrictEqual(result,shouldBe)
+        assert.deepStrictEqual(result, shouldBe)
     })
-
+    
     test('when the list has one blog', () => {
         const result = listHelper.mostBLogs(listWithOneBlog)
         const shouldBe = {
-            author:'Michael Chan',
-            count:1
+            author: 'Michael Chan',
+            count: 1
         }
-        assert.deepStrictEqual(result,shouldBe)
+        assert.deepStrictEqual(result, shouldBe)
     })
 
     test('of empty list', () => {
         const result = listHelper.mostBLogs(emptyList)
-        assert.deepStrictEqual(result,{})
+        assert.deepStrictEqual(result, {})
     })
 })

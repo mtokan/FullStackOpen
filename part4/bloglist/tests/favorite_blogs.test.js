@@ -103,7 +103,7 @@ describe('favorite blogs', () => {
         assert.deepStrictEqual(result, shouldBe)
     })
 
-    test('when there is multiple favorites',() => {
+    test('when there is multiple favorites', () => {
         const result = listHelper.favoriteBlogs(blogListWithTwoFavorite)
         const shouldBe = [{
             title: "Canonical string reduction",
@@ -116,9 +116,9 @@ describe('favorite blogs', () => {
         }]
         assert.deepStrictEqual(result, shouldBe)
     })
-
+    
     test('if blog list is empty should return empty array', () => {
         const result = listHelper.favoriteBlogs(emptyList)
-        assert.deepStrictEqual(result,[])
+        assert.deepStrictEqual(result, [])
     })
 })
