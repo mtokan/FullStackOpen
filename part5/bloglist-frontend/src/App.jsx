@@ -1,21 +1,17 @@
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import LoginForm from './components/LoginForm.jsx'
+import BlogForm from './components/BlogFrom.jsx'
+import NotificationBanner from './components/NotificationBanner.jsx'
+import Toggleable from './components/Toggleable.jsx'
 
 const App = () => {
-    const [notification, setNotification] = useState(null)
+    const [notification, setNotification] = useState({text: '', color: '', displayStatus: false})
     const [blogs, setBlogs] = useState([])
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    const [blogTitle, setBlogTitle] = useState('')
-    const [blogAuthor, setBlogAuthor] = useState('')
-    const [blogUrl, setBlogUrl] = useState('')
     const [user, setUser] = useState(null)
-
-    useEffect(() => {
-        if (user) blogService.getAll().then(blogs => setBlogs(blogs))
-    }, [user])
+    const blogFormRef = useRef()
 
     useEffect(() => {
         const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -26,23 +22,24 @@ const App = () => {
         }
     }, [])
 
+    useEffect(() => {
+        if (user)
+            blogService.getAll().then(blogs => setBlogs(blogs))
+    }, [user])
+
     const showNotification = (text, color) => {
-        setNotification({text, color})
+        setNotification({text, color, displayStatus: true})
         setTimeout(() => {
-            setNotification(null)
+            setNotification({text: '', color: '', displayStatus: false})
         }, 5000)
     }
 
-    const handleLogin = async (event) => {
-        event.preventDefault()
-
+    const login = async credentials => {
         try {
-            const user = await loginService.login({username, password})
+            const user = await loginService.login(credentials)
             window.localStorage.setItem('loggedUser', JSON.stringify(user))
             blogService.setToken(user.token)
             setUser(user)
-            setUsername('')
-            setPassword('')
             showNotification('logged in successfully.', 'green')
         } catch (error) {
             showNotification(error.response.data.error, 'red')
@@ -64,15 +61,12 @@ const App = () => {
         }
     }
 
-    const handleCreateBlog = async (event) => {
-        event.preventDefault()
-
+    const createBlog = async newBlog => {
         try {
             blogService.setToken(user.token)
-            const response = await blogService.createBlog({title: blogTitle, author: blogAuthor, url: blogUrl})
-            setBlogTitle('')
-            setBlogAuthor('')
-            setBlogUrl('')
+            const createdBlog = await blogService.createBlog(newBlog)
+            setBlogs([...blogs, {...createdBlog, user: user}])
+            blogFormRef.current.toggleVisibility()
             showNotification('blog created successfully.', 'green')
         } catch (error) {
             showNotification(error.response.data.error, 'red')
@@ -80,81 +74,55 @@ const App = () => {
         }
     }
 
-    const loginForm = () => (
-        <div>
-            <h2>login to application</h2>
-            <form onSubmit={handleLogin}>
-                <div>
-                    username
-                    <input type="text" value={username} name="Username"
-                           onChange={({target}) => setUsername(target.value)}/>
-                </div>
-                <div>
-                    password
-                    <input type="password" value={password} name="Password"
-                           onChange={({target}) => setPassword(target.value)}/>
-                </div>
-                <button type="submit">login</button>
-            </form>
-        </div>
-    )
+    const updateBlog = async (effectedBlog, changedData) => {
+        try {
+            blogService.setToken(user.token)
+            await blogService.updateBlog(effectedBlog.id, changedData)
+            const updatedBlog = {...effectedBlog, ...changedData}
+            setBlogs(blogs.map(blog => blog.id === effectedBlog.id ? updatedBlog : blog))
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
-    const createBlogForm = () => (
-        <div>
-            <h2>create new</h2>
-            <form onSubmit={handleCreateBlog}>
-                <div>
-                    title
-                    <input type="text" value={blogTitle} name="Title"
-                           onChange={({target}) => setBlogTitle(target.value)}/>
-                </div>
-                <div>
-                    author
-                    <input type="text" value={blogAuthor} name="Author"
-                           onChange={({target}) => setBlogAuthor(target.value)}/>
-                </div>
-                <div>
-                    url
-                    <input type="text" value={blogUrl} name="Url"
-                           onChange={({target}) => setBlogUrl(target.value)}/>
-                </div>
-                <button type="submit">create</button>
-            </form>
-        </div>
-    )
-
-    const blogList = () => (
-        <div>
-            <h2>blogs</h2>
-            <div>
-                <p>
-                    {user.name} logged in
-                    <button type="button" onClick={handleLogout}>logout</button>
-                </p>
-            </div>
-            {blogs.map(blog => <Blog key={blog.id} blog={blog}/>)}
-        </div>
-    )
-
-    const notificationPanel = () => (
-        <div style={{
-            backgroundColor: 'lightgrey',
-            border: `2px solid ${notification.color}`,
-            padding: '2px',
-            borderRadius: '5px',
-        }}>
-            <h2 style={{color: `${notification.color}`}}>{notification.text}</h2>
-        </div>
-    )
+    const deleteBlog = async id => {
+        try {
+            blogService.setToken(user.token)
+            await blogService.deleteBlog(id)
+            setBlogs(blogs.filter(blog => blog.id !== id))
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     return (
         <div>
-            {notification && notificationPanel()}
-            {user === null ? loginForm()
+            <NotificationBanner {...notification} />
+            {user === null ? <LoginForm login={login}/>
                 : (
                     <>
-                        {createBlogForm()}
-                        {blogList()}
+                        <div>
+                            <h2>blogs</h2>
+                            <div>
+                                <p>
+                                    {user.name} logged in
+                                    <button type="button" onClick={handleLogout}>logout</button>
+                                </p>
+                            </div>
+                            <Toggleable buttonLabel="new blog" ref={blogFormRef}>
+                                <BlogForm createBlog={createBlog}/>
+                            </Toggleable>
+                            {
+                                blogs
+                                    .toSorted((firstBlog, secondBlog) => secondBlog.likes - firstBlog.likes)
+                                    .map(blog => <Blog
+                                        key={blog.id}
+                                        blog={blog}
+                                        updateBlog={updateBlog}
+                                        deleteBlog={deleteBlog}
+                                        user={user}/>)
+                            }
+                        </div>
                     </>
                 )}
         </div>
