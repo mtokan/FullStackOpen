@@ -3,7 +3,7 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import LoginForm from './components/LoginForm.jsx'
-import BlogForm from './components/BlogFrom.jsx'
+import BlogForm from './components/BlogForm.jsx'
 import NotificationBanner from './components/NotificationBanner.jsx'
 import Toggleable from './components/Toggleable.jsx'
 
@@ -12,7 +12,7 @@ const App = () => {
     const [blogs, setBlogs] = useState([])
     const [user, setUser] = useState(null)
     const blogFormRef = useRef()
-
+    
     useEffect(() => {
         const loggedUserJSON = window.localStorage.getItem('loggedUser')
         if (loggedUserJSON) {
@@ -21,19 +21,19 @@ const App = () => {
             blogService.setToken(user.token)
         }
     }, [])
-
+    
     useEffect(() => {
         if (user)
             blogService.getAll().then(blogs => setBlogs(blogs))
     }, [user])
-
+    
     const showNotification = (text, color) => {
         setNotification({text, color, displayStatus: true})
         setTimeout(() => {
             setNotification({text: '', color: '', displayStatus: false})
         }, 5000)
     }
-
+    
     const login = async credentials => {
         try {
             const user = await loginService.login(credentials)
@@ -46,10 +46,10 @@ const App = () => {
             console.log(error)
         }
     }
-
+    
     const handleLogout = async (event) => {
         event.preventDefault()
-
+        
         try {
             window.localStorage.removeItem('loggedUser')
             blogService.setToken(null)
@@ -60,7 +60,7 @@ const App = () => {
             console.log(error)
         }
     }
-
+    
     const createBlog = async newBlog => {
         try {
             blogService.setToken(user.token)
@@ -73,7 +73,7 @@ const App = () => {
             console.log(error)
         }
     }
-
+    
     const updateBlog = async (effectedBlog, changedData) => {
         try {
             blogService.setToken(user.token)
@@ -84,7 +84,7 @@ const App = () => {
             console.log(error)
         }
     }
-
+    
     const deleteBlog = async id => {
         try {
             blogService.setToken(user.token)
@@ -94,7 +94,7 @@ const App = () => {
             console.log(error)
         }
     }
-
+    
     return (
         <div>
             <NotificationBanner {...notification} />
