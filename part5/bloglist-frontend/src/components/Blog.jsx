@@ -9,7 +9,7 @@ const Blog = ({blog, updateBlog, deleteBlog, user}) => {
     
     const toggleVisibility = () => {
         setVisible(!visible)
-        setButtonLabel(visible ? 'hide' : 'view')
+        setButtonLabel(visible ? 'view' : 'hide')
     }
     
     const divStyle = {
@@ -30,13 +30,13 @@ const Blog = ({blog, updateBlog, deleteBlog, user}) => {
     }
     
     return (
-        <div style={divStyle}>
+        <div data-testid='mainBlogDiv' style={divStyle}>
             <p>
                 {blog.title} {blog.author}
                 <button onClick={toggleVisibility}>{buttonLabel}</button>
             </p>
             <p style={showWhenVisible} id='hidable'>{blog.url}</p>
-            <p style={showWhenVisible} id='hidable'>
+            <p style={showWhenVisible} data-testid='likes' id='hidable'>
                 {blog.likes}
                 <button onClick={handleLike}>like</button>
             </p>
