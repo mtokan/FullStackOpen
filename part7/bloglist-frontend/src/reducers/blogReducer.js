@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import blogService from '../services/blogs.js'
 import { setNotification } from './notificationReducer.js'
+import { removeClientBlog } from './clientReducer.js'
 
 const blogSlice = createSlice({
   name: 'blogs',
@@ -18,15 +19,37 @@ const blogSlice = createSlice({
     removeBlog(state, action) {
       return state.filter((blog) => blog.id !== action.payload)
     },
+    addComment(state, action) {
+      return state.map((blog) =>
+        blog.id === action.payload.id
+          ? {
+              ...blog,
+              comments: [...blog.comments, action.payload.comment],
+            }
+          : blog,
+      )
+    },
   },
 })
 
-export const { setBlogs, addBlog, changeBlog, removeBlog } = blogSlice.actions
+export const { setBlogs, addBlog, changeBlog, removeBlog, addComment } = blogSlice.actions
 
 export const initializeBlogs = () => {
   return async (dispatch) => {
     const blogs = await blogService.getAll()
     dispatch(setBlogs(blogs))
+  }
+}
+
+export const createComment = (id, comment, user) => {
+  return async (dispatch) => {
+    try {
+      blogService.setToken(user.token)
+      const newComment = await blogService.createComment(id, comment)
+      dispatch(addComment({ id: id, comment: newComment }))
+    } catch (error) {
+      dispatch(setNotification({ text: error.response.data.error, color: 'red' }, 5))
+    }
   }
 }
 
@@ -56,12 +79,13 @@ export const updateBlog = (id, changedData, user) => {
   }
 }
 
-export const deleteBlog = (id, user) => {
+export const deleteBlog = (blog, user) => {
   return async (dispatch) => {
     try {
       blogService.setToken(user.token)
-      await blogService.deleteBlog(id)
-      dispatch(removeBlog(id))
+      await blogService.deleteBlog(blog.id)
+      dispatch(removeBlog(blog.id))
+      dispatch(removeClientBlog({ clientId: blog.user.id, blogId: blog.id }))
       dispatch(setNotification({ text: 'blog deleted successfully.', color: 'green' }, 5))
     } catch (error) {
       dispatch(setNotification({ text: error.response.data.error, color: 'red' }, 5))

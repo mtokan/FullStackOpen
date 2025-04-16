@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createBlog } from '../reducers/blogReducer.js'
+import { Button, Form, FormGroup } from 'react-bootstrap'
 
 const BlogForm = ({ toggleVisibility }) => {
   const dispatch = useDispatch()
@@ -21,42 +22,33 @@ const BlogForm = ({ toggleVisibility }) => {
 
   return (
     <div>
-      <h2>create new</h2>
-      <form onSubmit={handleCreateBlog}>
-        <div>
-          title
-          <input
+      <Form onSubmit={handleCreateBlog}>
+        <Form.Group>
+          <Form.Label>Title</Form.Label>
+          <Form.Control
             type="text"
-            value={blogTitle}
-            name="Title"
-            data-testid="title"
+            name="title"
             onChange={({ target }) => setBlogTitle(target.value)}
+            value={blogTitle}
           />
-        </div>
-        <div>
-          author
-          <input
+        </Form.Group>
+        <FormGroup>
+          <Form.Label>Author</Form.Label>
+          <Form.Control
             type="text"
-            value={blogAuthor}
-            name="Author"
-            data-testid="author"
+            name="author"
             onChange={({ target }) => setBlogAuthor(target.value)}
+            value={blogAuthor}
           />
-        </div>
-        <div>
-          url
-          <input
-            type="text"
-            value={blogUrl}
-            name="Url"
-            data-testid="url"
-            onChange={({ target }) => setBlogUrl(target.value)}
-          />
-        </div>
-        <button type="submit" data-testid="blogSubmitButton">
+        </FormGroup>
+        <FormGroup>
+          <Form.Label>Url</Form.Label>
+          <Form.Control type="text" name="url" onChange={({ target }) => setBlogUrl(target.value)} value={blogUrl} />
+        </FormGroup>
+        <Button variant={'primary'} type={'submit'}>
           create
-        </button>
-      </form>
+        </Button>
+      </Form>
     </div>
   )
 }

@@ -1,10 +1,10 @@
 import { Children, cloneElement, isValidElement, useState } from 'react'
 import PropTypes from 'prop-types'
+import { Button } from 'react-bootstrap'
 
 const Toggleable = ({ buttonLabel, children }) => {
   const [visible, setVisible] = useState(false)
 
-  const hideWhenVisible = { display: visible ? 'none' : '' }
   const showWhenVisible = { display: visible ? '' : 'none' }
 
   const toggleVisibility = () => {
@@ -18,15 +18,14 @@ const Toggleable = ({ buttonLabel, children }) => {
     return child
   })
 
+  const label = visible ? 'cancel' : buttonLabel
+
   return (
     <div>
-      <div style={hideWhenVisible}>
-        <button onClick={toggleVisibility}>{buttonLabel}</button>
+      <div>
+        <Button onClick={toggleVisibility}>{label}</Button>
       </div>
-      <div style={showWhenVisible}>
-        {childrenWithProps}
-        <button onClick={toggleVisibility}>cancel</button>
-      </div>
+      <div style={showWhenVisible}>{childrenWithProps}</div>
     </div>
   )
 }

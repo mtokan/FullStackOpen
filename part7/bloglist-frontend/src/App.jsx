@@ -9,6 +9,9 @@ import Menu from './components/Menu.jsx'
 import { Route, Routes } from 'react-router'
 import Blog from './components/Blog.jsx'
 import PrivateRoute from './components/PrivateRoute.jsx'
+import { initializeClients } from './reducers/clientReducer.js'
+import ClientList from './components/ClientList.jsx'
+import Client from './components/Client.jsx'
 
 const App = () => {
   const user = useSelector((state) => state.user)
@@ -19,21 +22,25 @@ const App = () => {
   }, [dispatch])
 
   useEffect(() => {
-    if (user) dispatch(initializeBlogs())
+    if (user) {
+      dispatch(initializeBlogs())
+      dispatch(initializeClients())
+    }
   }, [dispatch, user])
 
   if (user === undefined) return <div>Loading...</div>
 
   return (
-    <div>
+    <div className="container">
       <NotificationBanner />
       <Menu />
-      <h2>blog app</h2>
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<BlogList />} />
           <Route path="/blogs/:id" element={<Blog />} />
+          <Route path="/users" element={<ClientList />} />
+          <Route path="/users/:id" element={<Client />} />
         </Route>
       </Routes>
     </div>
