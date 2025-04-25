@@ -1,6 +1,8 @@
 const {ApolloServer} = require('@apollo/server')
 const {startStandaloneServer} = require('@apollo/server/standalone')
 const {v1: uuid} = require('uuid')
+const {readFileSync} = require('fs')
+const {join} = require('path')
 
 let authors = [
   {
@@ -80,35 +82,9 @@ let books = [
   },
 ]
 
+const typeDefs = readFileSync(join(__dirname, 'schema.graphql'), 'utf8')
 
-const typeDefs = `
-  type Author {
-    name: String!
-    born: Int
-    bookCount: Int!
-  }
-  
-  type Book {
-    title: String!
-    published: Int!
-    author: String!
-    id: ID!
-    genres: [String!]!
-  }
-  
-  type Query {
-    authorCount: Int!
-    bookCount: Int!
-    allBooks(author: String, genre: String): [Book!]!
-    allAuthors: [Author!]!
-  }
-  
-  type Mutation {
-    addBook(title: String!, published: Int!, author: String!, genres: [String!]!): Book
-    editAuthor(name: String!, born: Int!): Author
-  }
-`
-
+// noinspection JSUnusedGlobalSymbols
 const resolvers = {
   Query: {
     authorCount: () => authors.length,
