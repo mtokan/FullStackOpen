@@ -1,17 +1,27 @@
-const {authors, books} = require('../data')
+const Author = require('../../models/author')
+const Book = require('../../models/book')
 
 // noinspection JSUnusedGlobalSymbols
 const queryResolvers = {
-  authorCount: () => authors.length,
-  bookCount: () => books.length,
-  allBooks: (_, args) => {
-    return books.filter(book => {
-      const matchesAuthor = !args.author || book.author === args.author
-      const matchesGenre = !args.genre || book.genres.includes(args.genre)
-      return matchesAuthor && matchesGenre
-    })
+  authorCount: async () => Author.collection.countDocuments(),
+  bookCount: async () => Book.collection.countDocuments(),
+  allBooks: async (_, args) => {
+    const filter = {}
+    
+    if (args.author) {
+      const author = await Author.findOne({name: args.author})
+      if (!author) return []
+      filter.author = author._id
+    }
+    if (args.genre) {
+      filter.genres = args.genre
+    }
+    return Book.find(filter).populate('author')
   },
-  allAuthors: () => authors,
+  allAuthors: async () => Author.find({}),
+  me: (root, args, context) => {
+    return context.currentUser
+  }
 }
 
 module.exports = queryResolvers

@@ -1,6 +1,6 @@
-const Query = require('./Query');
-const Mutation = require('./Mutation');
-const Author = require('./Author');
+const Query = require('./query');
+const Mutation = require('./mutation');
+const Author = require('./author');
 
 module.exports = {
   Query,
