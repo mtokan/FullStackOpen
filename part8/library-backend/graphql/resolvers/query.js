@@ -18,6 +18,7 @@ const queryResolvers = {
     }
     return Book.find(filter).populate('author')
   },
+  allGenres: async () => Book.distinct('genres'),
   allAuthors: async () => Author.find({}),
   me: (root, args, context) => {
     return context.currentUser
