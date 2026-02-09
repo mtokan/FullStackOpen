@@ -1,22 +1,21 @@
 import { useQuery } from '@apollo/client'
-import { ALL_BOOKS, ALL_GENRES } from '../queries.js'
+import { ALL_GENRES } from '../queries.js'
 import { useState } from 'react'
 
 const Books = (props) => {
   const [genre, setGenre] = useState('')
   const { data: genresData, loading: genresLoading } = useQuery(ALL_GENRES)
-  const { data: booksData, loading: booksLoading } = useQuery(ALL_BOOKS, {
-    variables: { genre },
-    pollInterval: 5000,
-    fetchPolicy: 'cache-and-network',
-  })
 
   if (!props.show) {
     return null
   }
-  if (!booksData || !genresData || booksLoading || genresLoading) return <div>loading...</div>
-  const books = booksData.allBooks
+
+  if (!genresData || genresLoading) return <div>loading...</div>
+
+  let books = props.books
   const genres = genresData.allGenres
+
+  if (genre) books = books.filter((b) => b.genres.includes(genre))
 
   return (
     <div>

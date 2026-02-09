@@ -1,6 +1,7 @@
 const Author = require('../../models/author')
 const Book = require('../../models/book')
 const User = require('../../models/user')
+const pubsub = require('../pubsub')
 const {GraphQLError} = require('graphql/error')
 const jwt = require('jsonwebtoken')
 
@@ -42,7 +43,9 @@ const mutationResolvers = {
         }
       })
     }
-    return savedBook.populate('author')
+    const populatedBook = await savedBook.populate('author')
+    await pubsub.publish('BOOK_ADDED', { bookAdded: populatedBook })
+    return populatedBook
   },
   editAuthor: async (_, {name, born}, context) => {
     if (!context.currentUser) {
