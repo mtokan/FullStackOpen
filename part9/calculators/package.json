@@ -1,0 +1,17 @@
+{
+  "name": "bmi-calculator",
+  "version": "1.0.0",
+  "description": "bmi calculator",
+  "license": "ISC",
+  "author": "mto",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "calculateBmi": "ts-node bmiCalculator.ts",
+    "calculateExercises": "ts-node exerciseCalculator.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
