@@ -24,9 +24,9 @@ const parseArguments = (args: string[]): inputs => {
     const dailyHours: number[] = args.slice(3).map(Number);
 
     return {dailyHours, targetHours};
-}
+};
 
-const calculateExercises = (targetHours: number, dailyHours: number[]): Result => {
+export const calculateExercises = (targetHours: number, dailyHours: number[]): Result => {
     const average = dailyHours.reduce((acc, curr) => acc + curr, 0) / dailyHours.length;
     return {
         periodLength: dailyHours.length,
@@ -36,14 +36,16 @@ const calculateExercises = (targetHours: number, dailyHours: number[]): Result =
         ratingDescription: average >= targetHours ? 'Perfect' : average >= targetHours * 0.8 ? 'Good' : 'Bad',
         target: targetHours,
         average: average
-    }
-}
+    };
+};
 
-try {
-    const {dailyHours, targetHours} = parseArguments(process.argv);
-    console.log(calculateExercises(targetHours, dailyHours));
-} catch (error: unknown) {
-    let errorMessage = 'Something went wrong'
-    if (error instanceof Error) errorMessage += ' Error: ' + error.message;
-    console.log(errorMessage);
+if (require.main === module){
+    try {
+        const {dailyHours, targetHours} = parseArguments(process.argv);
+        console.log(calculateExercises(targetHours, dailyHours));
+    } catch (error: unknown) {
+        let errorMessage = 'Something went wrong';
+        if (error instanceof Error) errorMessage += ' Error: ' + error.message;
+        console.log(errorMessage);
+    }
 }
