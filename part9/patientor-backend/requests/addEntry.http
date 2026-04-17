@@ -1,0 +1,43 @@
+
+### Add HealthCheck Entry
+POST http://localhost:3001/api/patients/d2773822-f723-11e9-8f0b-362b9e155667/entries
+Content-Type: application/json
+
+{
+  "type": "HealthCheck",
+  "description": "Annual checkup",
+  "date": "2024-01-15",
+  "specialist": "Dr. Smith",
+  "healthCheckRating": 0
+}
+
+### Add OccupationalHealthcare Entry
+POST http://localhost:3001/api/patients/d2773822-f723-11e9-8f0b-362b9e155667/entries
+Content-Type: application/json
+
+{
+  "type": "OccupationalHealthcare",
+  "description": "Work physical",
+  "date": "2024-01-15",
+  "specialist": "Dr. Smith",
+  "employerName": "Acme Corp",
+  "sickLeave": {
+    "startDate": "2024-01-16",
+    "endDate": "2024-01-20"
+  }
+}
+
+### Add Hospital Entry
+POST http://localhost:3001/api/patients/d2773822-f723-11e9-8f0b-362b9e155667/entries
+Content-Type: application/json
+
+{
+  "type": "Hospital",
+  "description": "Surgery",
+  "date": "2024-01-15",
+  "specialist": "Dr. Smith",
+  "discharge": {
+    "date": "2024-01-20",
+    "criteria": "Fully recovered"
+  }
+}
